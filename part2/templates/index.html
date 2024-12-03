@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Todo List</h1>
+        </header>
+        
+        <section class="create-section">
+            <h2>Create a New Todo</h2>
+            <form action="/add" method="POST" class="create-form">
+                <input type="text" name="itemDescription" placeholder="Add a new TODO item" required>
+                <button type="submit" class="btn create-btn">Create</button>
+            </form>
+        </section>
+        
+        <section class="list-section">
+            <h2>Your Todos</h2>
+            <ul class="todo-list">
+                {% for item in todoList %}
+                <li class="todo-item {% if item.status == 'Done' %}done{% endif %}">
+                    <form action="/update/{{ item.id }}" method="POST" class="update-form">
+                        <div class="todo-row">
+                            <div class="item-details">
+                                <input type="checkbox" name="done" {% if item.status == 'Done' %}checked disabled{% endif %}>
+                                <input type="text" name="itemDescription" value="{{ item.description }}" {% if item.status == 'Done' %}disabled{% endif %} required>
+                            </div>
+                            <div class="item-actions">
+                                {% if item.status == 'Doing' %}
+                                    <button type="submit" class="btn update-btn">Update</button>
+                                {% else %}
+                                    <button type="submit" class="btn update-btn" disabled>Update</button>
+                                {% endif %}
+                                <a href="/delete/{{ item.id }}" class="btn delete-btn">Delete</a>
+                            </div>
+                        </div>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+    </div>
+</body>
+</html>
