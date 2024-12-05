@@ -83,11 +83,11 @@ def serve_file(filename):
 
 @app.route('/api/list', methods=['GET'])
 def api_list():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    connect = get_db_connection()
+    cursor = connect.cursor(dictionary=True)
     cursor.execute("SELECT * FROM todo ")
     todo_list = cursor.fetchall()
-    conn.close()
+    connect.close()
     return jsonify(todo_list)
 
 @app.route('/api/add', methods=['POST'])
@@ -100,12 +100,12 @@ def add_todo():
         if not description:
             return jsonify({'error': 'Description is required'}), 400
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        connect = get_db_connection()
+        cursor = connect.cursor()
         cursor.execute('INSERT INTO todo (description, status) VALUES (%s, %s)', (description, status))
-        conn.commit()
+        connect.commit()
         cursor.close()
-        conn.close()
+        connect.close()
 
         return jsonify({'message': 'Todo item created successfully'}), 201
     except Exception as e:
@@ -117,8 +117,8 @@ def update_todo():
     if not item_id:
         return jsonify({'error': 'Item ID is required'}), 400 
 
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    connect = get_db_connection()
+    cursor = connect.cursor(dictionary=True)
     cursor.execute('SELECT * FROM todo WHERE id = %s', (item_id,))
     todo_item = cursor.fetchone()
 
@@ -127,9 +127,9 @@ def update_todo():
     
     new_status = 'Done' if todo_item['status'] == 'Doing' else 'Doing'
     cursor.execute('UPDATE todo SET status = %s WHERE id = %s', (new_status, item_id))
-    conn.commit()
+    connect.commit()
     cursor.close()
-    conn.close()
+    connect.close()
 
     return jsonify({'message': f'Todo item {item_id} updated successfully to status {new_status}'}), 200
 
@@ -139,12 +139,12 @@ def delete_todo():
     if not item_id:
         return jsonify({'error': 'Item ID is required'}), 400
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    connect = get_db_connection()
+    cursor = connect.cursor()
     cursor.execute('DELETE FROM todo WHERE id = %s', (item_id,))
-    conn.commit()
+    connect.commit()
     cursor.close()
-    conn.close()
+    connect.close()
 
     return jsonify({'message': f'Todo item {item_id} deleted successfully'}), 200
 

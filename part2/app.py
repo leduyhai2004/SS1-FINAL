@@ -63,25 +63,25 @@ def get_db_connection():
 
 @app.route('/')
 def index():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    connect = get_db_connection()
+    cursor = connect.cursor(dictionary=True)
     cursor.execute('SELECT * FROM todo')
     todoList = cursor.fetchall()
     cursor.close()
-    conn.close()
+    connect.close()
     return render_template('index.html', todoList=todoList)
 
 @app.route('/add', methods=['POST'])
 def add_item():
-    description = request.form['itemDescription']
+    des = request.form['itemDescription']
     status = 'Doing'
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('INSERT INTO todo (description, status) VALUES (%s, %s)', (description, status))
-    conn.commit()
+    connect = get_db_connection()
+    cursor = connect.cursor()
+    cursor.execute('INSERT INTO todo (description, status) VALUES (%s, %s)', (des, status))
+    connect.commit()
     cursor.close()
-    conn.close()
+    connect.close()
 
     return redirect(url_for('index'))
 
@@ -91,24 +91,24 @@ def update_item(item_id):
     done = 'done' in request.form
     new_status = 'Done' if done else 'Doing'
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    connect = get_db_connection()
+    cursor = connect.cursor()
     cursor.execute('UPDATE todo SET description = %s, status = %s WHERE id = %s',
                    (description, new_status, item_id))
-    conn.commit()
+    connect.commit()
     cursor.close()
-    conn.close()
+    connect.close()
 
     return redirect(url_for('index'))
 
 @app.route('/delete/<int:item_id>')
 def delete_item(item_id):
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    connect = get_db_connection()
+    cursor = connect.cursor()
     cursor.execute('DELETE FROM todo WHERE id = %s', (item_id,))
-    conn.commit()
+    connect.commit()
     cursor.close()
-    conn.close()
+    connect.close()
 
     return redirect(url_for('index'))
 

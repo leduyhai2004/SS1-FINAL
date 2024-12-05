@@ -14,22 +14,22 @@ def index():
 
 @app.route('/add', methods=['POST'])
 def add_item():
-    description = request.form['itemDescription']
+    des = request.form['itemDescription']
     new_id = len(todoList) + 1
-    new_item = {'id': new_id, 'description': description, 'status': 'Doing'}
+    new_item = {'id': new_id, 'description': des, 'status': 'Doing'}
     todoList.insert(0, new_item)
     return redirect(url_for('index'))
 
 @app.route('/update/<int:item_id>', methods=['POST'])
 def update_item(item_id):
-    description = request.form['itemDescription']
+    des = request.form['itemDescription']
     done = 'done' in request.form
 
     new_status = 'Done' if done else 'Doing'
 
     for item in todoList:
         if item['id'] == item_id:
-            item['description'] = description
+            item['description'] = des
             item['status'] = new_status
             break
 
