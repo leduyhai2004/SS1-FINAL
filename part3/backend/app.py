@@ -2,13 +2,13 @@ from flask import Flask, request, jsonify, render_template, send_from_directory
 import mysql.connector
 import os
 
-app = Flask(__name__, template_folder='')
+app = Flask(__name__, template_folder='../frontend')
 DB_HOST = 'localhost'
 DB_USER = 'root'
 DB_PASSWORD = '272004'
 DB_NAME = 'todo_app'
 
-def ensure_database_exists():
+def checkDatabase():
     """
     Checks if the database exists. If it doesn't, creates it, the tables, and inserts initial data.
     """
@@ -20,26 +20,20 @@ def ensure_database_exists():
         )
         cursor = conn.cursor()
 
-        # Check if the database exists
         cursor.execute("SHOW DATABASES")
         databases = [db[0] for db in cursor.fetchall()]
         if DB_NAME in databases:
             print(f"Database '{DB_NAME}' already exists.")
         else:
             print(f"Database '{DB_NAME}' not found. Creating database...")
-            # cursor.execute(f"CREATE DATABASE {DB_NAME}")
-            # cursor.execute(f"USE {DB_NAME}")
-            
-            # Read the SQL script
+
             with open('create_db.sql', 'r') as file:
                 sql_script = file.read()
             
-            # Execute the script (split by ';' for multiple commands)
             for statement in sql_script.split(';'):
                 if statement.strip():
                     cursor.execute(statement)
             print(f"Database '{DB_NAME}' and tables created successfully with initial data.")
-        # Ensure that data is inserted even if the table exists
         conn.database = DB_NAME
         cursor.execute("SELECT COUNT(*) FROM todo")
         if cursor.fetchone()[0] == 0:  # If the table is empty
@@ -70,19 +64,28 @@ db_config = {
 def get_db_connection():
     return mysql.connector.connect(**db_config)
 
+@app.route('/style.css')
+def serve_css():
+    return send_from_directory('../frontend', 'style.css')
+
+@app.route('/index.js')
+def serve_js():
+    return send_from_directory('../frontend', 'index.js')
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/<path:filename>')
-def serve_static_file(filename):
-    return send_from_directory(os.getcwd(), filename)
+@app.route('/<filename>')
+def serve_file(filename):
+    return send_from_directory('../frontend', filename)
+
 
 @app.route('/api/list', methods=['GET'])
 def api_list():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM todo ORDER BY id DESC")
+    cursor.execute("SELECT * FROM todo ")
     todo_list = cursor.fetchall()
     conn.close()
     return jsonify(todo_list)
@@ -146,5 +149,5 @@ def delete_todo():
     return jsonify({'message': f'Todo item {item_id} deleted successfully'}), 200
 
 if __name__ == '__main__':
-    ensure_database_exists()
+    checkDatabase()
     app.run(debug=True)
