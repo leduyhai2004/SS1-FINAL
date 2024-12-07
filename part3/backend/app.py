@@ -94,59 +94,59 @@ def api_list():
 def add_todo():
     try:
         data = request.get_json()
-        description = data.get('itemDescription')
+        des = data.get('itemDescription')
         status = 'Doing' 
 
-        if not description:
+        if not des:
             return jsonify({'error': 'Description is required'}), 400
 
         connect = get_db_connection()
         cursor = connect.cursor()
-        cursor.execute('INSERT INTO todo (description, status) VALUES (%s, %s)', (description, status))
+        cursor.execute('INSERT INTO todo (description, status) VALUES (%s, %s)', (des, status))
         connect.commit()
         cursor.close()
         connect.close()
 
-        return jsonify({'message': 'Todo item created successfully'}), 201
+        return jsonify({'message': 'Todo created successfully'}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/update', methods=['GET']) 
 def update_todo():
-    item_id = request.args.get('id')
-    if not item_id:
+    itemId = request.args.get('id')
+    if not itemId:
         return jsonify({'error': 'Item ID is required'}), 400 
 
     connect = get_db_connection()
     cursor = connect.cursor(dictionary=True)
-    cursor.execute('SELECT * FROM todo WHERE id = %s', (item_id,))
+    cursor.execute('SELECT * FROM todo WHERE id = %s', (itemId,))
     todo_item = cursor.fetchone()
 
     if not todo_item:
         return jsonify({'error': 'Todo item not found'}), 404
     
-    new_status = 'Done' if todo_item['status'] == 'Doing' else 'Doing'
-    cursor.execute('UPDATE todo SET status = %s WHERE id = %s', (new_status, item_id))
+    newStatus = 'Done' if todo_item['status'] == 'Doing' else 'Doing'
+    cursor.execute('UPDATE todo SET status = %s WHERE id = %s', (newStatus, itemId))
     connect.commit()
     cursor.close()
     connect.close()
 
-    return jsonify({'message': f'Todo item {item_id} updated successfully to status {new_status}'}), 200
+    return jsonify({'message': f'Todo item {itemId} updated successfully to status {newStatus}'}), 200
 
 @app.route('/api/delete', methods=['DELETE'])
 def delete_todo():
-    item_id = request.args.get('id')
-    if not item_id:
+    itemId = request.args.get('id')
+    if not itemId:
         return jsonify({'error': 'Item ID is required'}), 400
 
     connect = get_db_connection()
     cursor = connect.cursor()
-    cursor.execute('DELETE FROM todo WHERE id = %s', (item_id,))
+    cursor.execute('DELETE FROM todo WHERE id = %s', (itemId,))
     connect.commit()
     cursor.close()
     connect.close()
 
-    return jsonify({'message': f'Todo item {item_id} deleted successfully'}), 200
+    return jsonify({'message': f'Todo item {itemId} deleted successfully'}), 200
 
 if __name__ == '__main__':
     checkDatabase()

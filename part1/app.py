@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 
 app = Flask(__name__)
 
@@ -11,34 +11,37 @@ todoList = [
 @app.route('/')
 def index():
     return render_template('index.html', todoList=todoList)
+@app.route('/templates/styles.css')
+def serve_css():
+    return send_from_directory('templates', 'styles.css')
 
 @app.route('/add', methods=['POST'])
 def add_item():
     des = request.form['itemDescription']
-    new_id = len(todoList) + 1
-    new_item = {'id': new_id, 'description': des, 'status': 'Doing'}
-    todoList.insert(0, new_item)
+    newId = len(todoList) + 1
+    newItem = {'id': newId, 'description': des, 'status': 'Doing'}
+    todoList.insert(0, newItem)
     return redirect(url_for('index'))
 
-@app.route('/update/<int:item_id>', methods=['POST'])
-def update_item(item_id):
+@app.route('/update/<int:itemId>', methods=['POST'])
+def update_item(itemId):
     des = request.form['itemDescription']
     done = 'done' in request.form
 
-    new_status = 'Done' if done else 'Doing'
+    newStatus = 'Done' if done else 'Doing'
 
     for item in todoList:
-        if item['id'] == item_id:
+        if item['id'] == itemId:
             item['description'] = des
-            item['status'] = new_status
+            item['status'] = newStatus
             break
 
     return redirect(url_for('index'))
 
-@app.route('/delete/<int:item_id>')
-def delete_item(item_id):
+@app.route('/delete/<int:itemId>')
+def delete_item(itemId):
     global todoList
-    todoList = [item for item in todoList if item['id'] != item_id]
+    todoList = [item for item in todoList if item['id'] != itemId]
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
